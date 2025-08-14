@@ -1,0 +1,563 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model DownloadPackages {
+  id                  Int      @id @default(autoincrement())
+  downloadRequestId   Int?
+  packageId           String?  @db.VarChar(45)
+  downloaded          Boolean? @default(false)
+  fecha_creacion      DateTime @db.DateTime(0)
+  fecha_actualizacion DateTime @db.DateTime(0)
+}
+
+model DownloadRequests {
+  id                  Int       @id @default(autoincrement())
+  companyId           Int?
+  reportRequestId     Int?
+  requestId           String?   @db.VarChar(36)
+  startDate           DateTime? @db.DateTime(0)
+  endDate             DateTime? @db.DateTime(0)
+  emisor              String?   @db.VarChar(13)
+  receiver            String?   @db.VarChar(13)
+  type                String?   @db.VarChar(10)
+  retention           Boolean?  @default(false)
+  estatus             Int?      @default(0)
+  codeDownload        String?   @db.VarChar(4)
+  totalDocuments      Int?      @default(0)
+  fecha_creacion      DateTime  @db.DateTime(0)
+  fecha_actualizacion DateTime  @db.DateTime(0)
+}
+
+model HoldingTaxesDocuments {
+  id                    Int                   @id @default(autoincrement())
+  cfdi_id               Int
+  impuesto              String?               @db.VarChar(3)
+  importe               Decimal?              @db.Decimal(12, 2)
+  fecha_creacion        DateTime              @db.DateTime(0)
+  fecha_actualizacion   DateTime              @db.DateTime(0)
+  comprobantes_fiscales comprobantes_fiscales @relation(fields: [cfdi_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "HoldingTaxesDocuments_ibfk_1")
+
+  @@index([cfdi_id], map: "cfdi_id")
+}
+
+model ReportRequests {
+  id                  Int                          @id @default(autoincrement())
+  companyId           BigInt?
+  requestFrom         DateTime?                    @db.Date
+  requestUntil        DateTime?                    @db.Date
+  month               Int?
+  year                Int?
+  status              Int?                         @default(0)
+  failed              Boolean?                     @default(false)
+  requestType         ReportRequests_requestType?  @default(report)
+  downloadType        ReportRequests_downloadType?
+  isRetention         Boolean?                     @default(false)
+  expirationDate      DateTime?                    @db.DateTime(0)
+  fecha_creacion      DateTime                     @db.DateTime(0)
+  fecha_actualizacion DateTime                     @db.DateTime(0)
+}
+
+model SequelizeMeta {
+  name String @id @unique(map: "name") @db.VarChar(255)
+}
+
+model TraslatedTaxesDocuments {
+  id                    Int                   @id @default(autoincrement())
+  cfdi_id               Int
+  base                  Decimal?              @default(0.00) @db.Decimal(14, 2)
+  impuesto              String?               @db.VarChar(3)
+  tipoFactor            String?               @db.VarChar(10)
+  tasaOCuota            Decimal?              @db.Decimal(10, 6)
+  importe               Decimal?              @db.Decimal(12, 2)
+  fecha_creacion        DateTime              @db.DateTime(0)
+  fecha_actualizacion   DateTime              @db.DateTime(0)
+  comprobantes_fiscales comprobantes_fiscales @relation(fields: [cfdi_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "TraslatedTaxesDocuments_ibfk_1")
+
+  @@index([cfdi_id], map: "cfdi_id")
+}
+
+model users {
+  id               String           @id @default(uuid())
+  name             String           @map("name")
+  email            String           @unique @map("email")
+  password         String           @map("password")
+  createdAt        DateTime         @default(now()) @map("fecha_registro")
+  updatedAt        DateTime         @default(now()) @updatedAt @map("ultima_actualizacion")
+  rfc              String?          @db.VarChar(20) @unique(map: "rfc")
+
+  @@map("usuarios")
+}
+
+model archivos_bancarios {
+  id                      Int                       @id @default(autoincrement())
+  empresa_id              Int
+  nombre_archivo          String                    @db.VarChar(255)
+  hash_archivo            String                    @unique(map: "hash_archivo") @db.VarChar(64)
+  tamano_bytes            Int
+  banco                   archivos_bancarios_banco
+  numero_cuenta           String?                   @db.VarChar(50)
+  periodo_inicio          DateTime?                 @db.DateTime(0)
+  periodo_fin             DateTime?                 @db.DateTime(0)
+  saldo_inicial           Decimal?                  @db.Decimal(12, 2)
+  saldo_final             Decimal?                  @db.Decimal(12, 2)
+  total_movimientos       Int?
+  movimientos_procesados  Int?
+  errores_ocr             Json?
+  tiempo_procesamiento    Int?
+  paginas_procesadas      Int?
+  datos_metadata          Json?
+  procesado_exitosamente  Boolean?
+  fecha_creacion          DateTime                  @db.DateTime(0)
+  fecha_procesamiento     DateTime?                 @db.DateTime(0)
+  empresas_contribuyentes empresas_contribuyentes   @relation(fields: [empresa_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "archivos_bancarios_ibfk_1")
+  movimientos_bancarios   movimientos_bancarios[]
+  resultados_conciliacion resultados_conciliacion[]
+
+  @@index([banco, periodo_inicio, periodo_fin], map: "idx_archivo_banco_periodo")
+  @@index([empresa_id], map: "idx_archivo_empresa")
+  @@index([hash_archivo], map: "idx_archivo_hash")
+}
+
+model certificados {
+  id                  Int       @id @default(autoincrement())
+  companyId           BigInt?
+  rfc                 String?   @db.VarChar(13)
+  number              String?   @db.VarChar(50)
+  issuerName          String?   @db.VarChar(500)
+  validFrom           DateTime? @db.DateTime(0)
+  validUntil          DateTime? @db.DateTime(0)
+  revocated           Boolean?  @default(false)
+  fecha_creacion      DateTime  @db.DateTime(0)
+  fecha_actualizacion DateTime  @db.DateTime(0)
+}
+
+model complementos_nomina {
+  id                          Int                   @id @default(autoincrement())
+  cfdi_id                     Int                   @unique(map: "cfdi_id")
+  tipo_nomina                 String?               @db.VarChar(3)
+  numero_dias_pagados         Int?
+  fecha_pago                  DateTime?             @db.Date
+  fecha_inicial_periodo       DateTime?             @db.Date
+  fecha_final_periodo         DateTime?             @db.Date
+  total_percepciones_nomina   Decimal?              @db.Decimal(12, 2)
+  total_exento                Decimal?              @db.Decimal(12, 2)
+  total_gravado               Decimal?              @db.Decimal(12, 2)
+  total_sueldos               Decimal?              @db.Decimal(12, 2)
+  total_otros_pagos           Decimal?              @db.Decimal(12, 2)
+  total_deducciones_nomina    Decimal?              @db.Decimal(12, 2)
+  total_impuestos_retenidos   Decimal?              @db.Decimal(12, 2)
+  total_otras_deducciones     Decimal?              @db.Decimal(12, 2)
+  total_subsidio              Decimal?              @db.Decimal(12, 2)
+  total_subsidio_causado      Decimal?              @db.Decimal(12, 2)
+  total_imss                  Decimal?              @db.Decimal(12, 2)
+  total_isr                   Decimal?              @db.Decimal(12, 2)
+  total_infonavit             Decimal?              @db.Decimal(12, 2)
+  total_aportaciones_a_retiro Decimal?              @db.Decimal(12, 2)
+  fecha_creacion              DateTime              @db.DateTime(0)
+  fecha_actualizacion         DateTime              @db.DateTime(0)
+  comprobantes_fiscales       comprobantes_fiscales @relation(fields: [cfdi_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "complementos_nomina_ibfk_1")
+
+  @@index([fecha_pago], map: "idx_fecha_pago_nomina")
+}
+
+model complementos_pago {
+  id                                   Int                   @id @default(autoincrement())
+  cfdi_id                              Int
+  objeto_impuesto_pago                 Boolean?              @default(true)
+  forma_pago_pago                      String?               @db.VarChar(3)
+  fecha_pago_pago                      DateTime?             @db.DateTime(0)
+  moneda_pago                          String?               @db.VarChar(3)
+  monto_pago                           Decimal?              @db.Decimal(12, 2)
+  tipo_cambio_pago                     Decimal?              @db.Decimal(12, 2)
+  cuenta_ordenante_pago                String?               @db.VarChar(255)
+  cuenta_beneficiario_pago             String?               @db.VarChar(255)
+  total_ieps_retenciones_pago          Decimal?              @db.Decimal(12, 2)
+  total_isr_retenciones_pago           Decimal?              @db.Decimal(12, 2)
+  total_iva_retenciones_pago           Decimal?              @db.Decimal(12, 2)
+  total_base_iva_exento_traslados_pago Decimal?              @db.Decimal(12, 2)
+  total_base_iva_0_traslados_pago      Decimal?              @db.Decimal(12, 2)
+  total_base_iva_8_traslados_pago      Decimal?              @db.Decimal(12, 2)
+  total_base_iva_16_traslados_pago     Decimal?              @db.Decimal(12, 2)
+  total_impuesto_iva_0_traslados_pago  Decimal?              @db.Decimal(12, 2)
+  total_impuesto_iva_8_traslados_pago  Decimal?              @db.Decimal(12, 2)
+  total_impuesto_iva_16_traslados_pago Decimal?              @db.Decimal(12, 2)
+  fecha_creacion                       DateTime              @db.DateTime(0)
+  fecha_actualizacion                  DateTime              @db.DateTime(0)
+  comprobantes_fiscales                comprobantes_fiscales @relation(fields: [cfdi_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "complementos_pago_ibfk_1")
+
+  @@index([cfdi_id], map: "idx_cfdi_pago")
+  @@index([fecha_pago_pago], map: "idx_fecha_pago")
+}
+
+model comprobantes_fiscales {
+  id                                      Int                                       @id @default(autoincrement())
+  empresa_id                              Int?
+  version_cfdi                            Decimal?                                  @db.Decimal(4, 2)
+  rfc_emisor                              String?                                   @db.VarChar(13)
+  nombre_emisor                           String?                                   @db.VarChar(500)
+  regimen_fiscal_emisor                   String?                                   @db.VarChar(3)
+  rfc_receptor                            String?                                   @db.VarChar(13)
+  nombre_receptor                         String?                                   @db.VarChar(500)
+  codigo_postal_receptor                  String?                                   @db.VarChar(5)
+  regimen_fiscal_receptor                 String?                                   @db.VarChar(3)
+  subtotal                                Decimal?                                  @db.Decimal(12, 2)
+  descuento                               Decimal?                                  @db.Decimal(12, 2)
+  total                                   Decimal?                                  @db.Decimal(12, 2)
+  fecha                                   DateTime?                                 @db.DateTime(0)
+  forma_pago                              String?                                   @db.VarChar(2)
+  metodo_pago                             String?                                   @db.VarChar(3)
+  moneda                                  String?                                   @db.VarChar(3)
+  tipo_cambio                             Decimal?                                  @db.Decimal(8, 2)
+  tipo_comprobante                        comprobantes_fiscales_tipo_comprobante?
+  complementos                            String?                                   @db.VarChar(150)
+  codigo_postal_expedicion                String?                                   @db.VarChar(6)
+  serie_cfdi                              String?                                   @db.VarChar(25)
+  folio_cfdi                              String?                                   @db.VarChar(40)
+  uuid                                    String?                                   @unique(map: "uuid") @db.VarChar(36)
+  fecha_timbrado                          DateTime?                                 @db.DateTime(0)
+  uso_cfdi                                String?                                   @db.VarChar(3)
+  estatus_sat                             Boolean?                                  @default(true)
+  fecha_cancelacion                       DateTime?                                 @db.DateTime(0)
+  nombre_archivo                          String?                                   @db.VarChar(255)
+  fecha_creacion                          DateTime                                  @db.DateTime(0)
+  fecha_actualizacion                     DateTime                                  @db.DateTime(0)
+  HoldingTaxesDocuments                   HoldingTaxesDocuments[]
+  TraslatedTaxesDocuments                 TraslatedTaxesDocuments[]
+  complementos_nomina                     complementos_nomina?
+  complementos_pago                       complementos_pago[]
+  empresas_contribuyentes                 empresas_contribuyentes?                  @relation(fields: [empresa_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "comprobantes_fiscales_ibfk_1")
+  conceptos_comprobantes                  conceptos_comprobantes[]
+  documentos_relacionados_pago            documentos_relacionados_pago[]
+  impuestos_comprobante                   impuestos_comprobante[]
+  impuestos_conceptos                     impuestos_conceptos[]
+  incapacidades_nomina                    incapacidades_nomina[]
+  movimientos_bancarios                   movimientos_bancarios[]
+  totales_impuestos_comprobantes_fiscales totales_impuestos_comprobantes_fiscales[]
+
+  @@unique([rfc_emisor, rfc_receptor, total, uuid], map: "rfc_receptor_total_uuid_unique")
+  @@index([empresa_id, fecha_timbrado], map: "idx_empresa_fecha")
+  @@index([fecha_timbrado], map: "idx_fecha_timbrado")
+  @@index([rfc_emisor], map: "idx_rfc_emisor")
+  @@index([rfc_receptor], map: "idx_rfc_receptor")
+  @@index([tipo_comprobante], map: "idx_tipo_comprobante")
+  @@index([uuid], map: "idx_uuid")
+}
+
+model conceptos_comprobantes {
+  id                      Int                   @id @default(autoincrement())
+  cfdi_id                 Int
+  clave_producto_servicio String?               @db.VarChar(100)
+  numero_identificacion   String?               @db.VarChar(100)
+  clave_unidad            String?               @db.VarChar(100)
+  unidad                  String?               @db.VarChar(50)
+  cantidad                Decimal?              @db.Decimal(12, 2)
+  descripcion             String?               @db.VarChar(1000)
+  valor_unitario          Decimal?              @db.Decimal(12, 2)
+  importe                 Decimal?              @db.Decimal(12, 2)
+  descuento               Decimal?              @db.Decimal(12, 2)
+  fecha_creacion          DateTime              @db.DateTime(0)
+  fecha_actualizacion     DateTime              @db.DateTime(0)
+  comprobantes_fiscales   comprobantes_fiscales @relation(fields: [cfdi_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "conceptos_comprobantes_ibfk_1")
+  impuestos_conceptos     impuestos_conceptos[]
+
+  @@index([cfdi_id], map: "idx_cfdi_concepto")
+  @@index([clave_producto_servicio], map: "idx_clave_producto")
+}
+
+model contribuyentes_detectados_lista_negra {
+  id                      Int                      @id @default(autoincrement())
+  empresa_id              Int?
+  tipo_relacion_cfdi      Int?                     @default(0) @db.TinyInt
+  rfc_detectado           String?                  @db.VarChar(13)
+  razon_social_detectada  String?                  @db.VarChar(500)
+  tipo_lista              String?                  @db.VarChar(255)
+  nombre_lista            String?                  @db.VarChar(255)
+  mes_deteccion           Int?
+  anio_deteccion          Int?
+  descripcion             String?                  @db.Text
+  fecha_creacion          DateTime                 @db.DateTime(0)
+  fecha_actualizacion     DateTime                 @db.DateTime(0)
+  empresas_contribuyentes empresas_contribuyentes? @relation(fields: [empresa_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "contribuyentes_detectados_lista_negra_ibfk_1")
+
+  @@unique([empresa_id, tipo_relacion_cfdi, rfc_detectado, mes_deteccion, anio_deteccion], map: "company_recibidas_rfc_date_unique")
+  @@index([empresa_id, mes_deteccion, anio_deteccion], map: "idx_empresa_fecha")
+  @@index([rfc_detectado], map: "idx_rfc_detectado")
+}
+
+model conversaciones {
+  id             Int        @id @default(autoincrement())
+  rfc_empresa    String     @db.VarChar(13)
+  nombre_empresa String?    @db.VarChar(500)
+  created_at     DateTime?  @default(now()) @db.DateTime(0)
+  updated_at     DateTime?  @default(now()) @db.DateTime(0)
+  mensajes       mensajes[]
+
+  @@index([rfc_empresa], map: "idx_conversaciones_rfc_empresa")
+}
+
+model documentos_relacionados_pago {
+  id                           Int                   @id @default(autoincrement())
+  cfdi_id                      Int
+  uuid_cfdi_relacionado        String?               @db.VarChar(36)
+  serie_cfdi_relacionado       String?               @db.VarChar(255)
+  folio_cfdi_relacionado       String?               @db.VarChar(255)
+  moneda_cfdi_relacionado      String?               @db.VarChar(3)
+  tipo_cambio_cfdi_relacionado Decimal?              @db.Decimal(8, 2)
+  metodo_pago_cfdi_relacionado String?               @db.VarChar(3)
+  numero_parcialidad           Int?
+  importe_saldo_anterior       Decimal?              @db.Decimal(12, 2)
+  importe_pagado               Decimal?              @db.Decimal(12, 2)
+  saldo_restante               Decimal?              @db.Decimal(12, 2)
+  fecha_creacion               DateTime              @db.DateTime(0)
+  fecha_actualizacion          DateTime              @db.DateTime(0)
+  comprobantes_fiscales        comprobantes_fiscales @relation(fields: [cfdi_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "documentos_relacionados_pago_ibfk_1")
+
+  @@index([cfdi_id, uuid_cfdi_relacionado], map: "idx_pago_documento")
+  @@index([uuid_cfdi_relacionado], map: "idx_uuid_pagado")
+}
+
+model empresas_contribuyentes {
+  id                                    Int                                     @id @default(autoincrement())
+  rfc                                   String?                                 @db.VarChar(13)
+  razon_social                          String?                                 @db.VarChar(250)
+  correo_electronico                    String?                                 @db.VarChar(250)
+  feccha_expiracion                     DateTime?                               @db.DateTime(0)
+  fecha_creacion                        DateTime                                @db.DateTime(0)
+  fecha_actualizacion                   DateTime                                @db.DateTime(0)
+  archivos_bancarios                    archivos_bancarios[]
+  comprobantes_fiscales                 comprobantes_fiscales[]
+  contribuyentes_detectados_lista_negra contribuyentes_detectados_lista_negra[]
+  movimientos_bancarios                 movimientos_bancarios[]
+  resultados_conciliacion               resultados_conciliacion[]
+
+  @@index([rfc], map: "idx_rfc")
+}
+
+model impuestos_comprobante {
+  id                    Int                   @id @default(autoincrement())
+  cfdi_id               Int
+  retencion             Boolean?              @default(false)
+  base                  Decimal?              @db.Decimal(12, 2)
+  impuesto              String?               @db.VarChar(3)
+  tipoFactor            String?               @db.VarChar(10)
+  tasaOCuota            Decimal?              @db.Decimal(10, 6)
+  importe               Decimal?              @db.Decimal(12, 2)
+  fecha_creacion        DateTime              @db.DateTime(0)
+  fecha_actualizacion   DateTime              @db.DateTime(0)
+  comprobantes_fiscales comprobantes_fiscales @relation(fields: [cfdi_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "impuestos_comprobante_ibfk_1")
+
+  @@index([cfdi_id], map: "cfdi_id")
+}
+
+model impuestos_conceptos {
+  id                     Int                              @id @default(autoincrement())
+  cfdi_id                Int
+  concepto_id            Int
+  tipo_impuesto          Boolean?                         @default(false)
+  base_gravable          Decimal?                         @db.Decimal(16, 6)
+  codigo_impuesto        String?                          @db.VarChar(3)
+  tipo_factor            impuestos_conceptos_tipo_factor? @default(Tasa)
+  tasa_o_cuota           Decimal?                         @db.Decimal(10, 6)
+  importe_impuesto       Decimal?                         @db.Decimal(12, 2)
+  fecha_creacion         DateTime                         @db.DateTime(0)
+  fecha_actualizacion    DateTime                         @db.DateTime(0)
+  comprobantes_fiscales  comprobantes_fiscales            @relation(fields: [cfdi_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "impuestos_conceptos_ibfk_1")
+  conceptos_comprobantes conceptos_comprobantes           @relation(fields: [concepto_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "impuestos_conceptos_ibfk_2")
+
+  @@index([cfdi_id], map: "cfdi_id")
+  @@index([concepto_id, tipo_impuesto, codigo_impuesto], map: "idx_concepto_impuesto")
+}
+
+model incapacidades_nomina {
+  id                            Int                   @id @default(autoincrement())
+  cfdi_id                       Int
+  total_incapacidades           Decimal?              @default(0.00) @db.Decimal(12, 2)
+  monto_riesgo_trabajo          Decimal?              @default(0.00) @db.Decimal(12, 2)
+  monto_enfermedad_general      Decimal?              @default(0.00) @db.Decimal(12, 2)
+  monto_maternidad              Decimal?              @default(0.00) @db.Decimal(12, 2)
+  monto_licencia_cuidados_hijos Decimal?              @default(0.00) @db.Decimal(12, 2)
+  fecha_creacion                DateTime              @db.DateTime(0)
+  fecha_actualizacion           DateTime              @db.DateTime(0)
+  comprobantes_fiscales         comprobantes_fiscales @relation(fields: [cfdi_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "incapacidades_nomina_ibfk_1")
+
+  @@index([cfdi_id], map: "idx_cfdi_incapacidad")
+}
+
+model lista_negra_sat_oficial {
+  id                     Int      @id @default(autoincrement())
+  rfc                    String?  @db.VarChar(13)
+  nombre_razon_social    String?  @db.VarChar(255)
+  tipo_lista             String?  @db.VarChar(5)
+  supuesto               String?  @db.VarChar(50)
+  descripcion_motivo     String?  @db.VarChar(255)
+  nombre_archivo         String?  @db.VarChar(50)
+  fecha_inicio_situacion String?  @db.VarChar(50)
+  fecha_fin_situacion    String?  @db.VarChar(50)
+  fecha_creacion         DateTime @db.DateTime(0)
+  fecha_actualizacion    DateTime @db.DateTime(0)
+
+  @@index([rfc], map: "rfc_index")
+}
+
+model mensajes {
+  id              Int            @id @default(autoincrement())
+  conversacion_id Int
+  role            String         @db.VarChar(20)
+  content         String         @db.Text
+  timestamp       DateTime?      @default(now()) @db.DateTime(0)
+  conversaciones  conversaciones @relation(fields: [conversacion_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_mensajes_conversacion")
+
+  @@index([conversacion_id], map: "idx_mensajes_conversacion_id")
+  @@index([timestamp], map: "idx_mensajes_timestamp")
+}
+
+model movimientos_bancarios {
+  id                      Int                                        @id @default(autoincrement())
+  empresa_id              Int
+  fecha                   DateTime                                   @db.DateTime(0)
+  concepto                String                                     @db.Text
+  monto                   Decimal                                    @db.Decimal(12, 2)
+  tipo                    movimientos_bancarios_tipo
+  referencia              String?                                    @db.VarChar(255)
+  saldo                   Decimal?                                   @db.Decimal(12, 2)
+  estado                  movimientos_bancarios_estado?
+  cfdi_uuid               String?                                    @db.VarChar(36)
+  nivel_confianza         Decimal?                                   @db.Decimal(3, 2)
+  metodo_conciliacion     movimientos_bancarios_metodo_conciliacion?
+  archivo_origen_id       Int?
+  datos_ocr               Json?
+  notas                   String?                                    @db.Text
+  fecha_creacion          DateTime                                   @db.DateTime(0)
+  fecha_actualizacion     DateTime                                   @db.DateTime(0)
+  fecha_conciliacion      DateTime?                                  @db.DateTime(0)
+  empresas_contribuyentes empresas_contribuyentes                    @relation(fields: [empresa_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "movimientos_bancarios_ibfk_1")
+  comprobantes_fiscales   comprobantes_fiscales?                     @relation(fields: [cfdi_uuid], references: [uuid], onUpdate: NoAction, map: "movimientos_bancarios_ibfk_2")
+  archivos_bancarios      archivos_bancarios?                        @relation(fields: [archivo_origen_id], references: [id], onUpdate: NoAction, map: "movimientos_bancarios_ibfk_3")
+
+  @@index([archivo_origen_id], map: "archivo_origen_id")
+  @@index([cfdi_uuid], map: "idx_movimiento_cfdi_uuid")
+  @@index([concepto(length: 100)], map: "idx_movimiento_concepto")
+  @@index([empresa_id, fecha], map: "idx_movimiento_empresa_fecha")
+  @@index([estado], map: "idx_movimiento_estado")
+  @@index([monto], map: "idx_movimiento_monto")
+}
+
+model resultados_conciliacion {
+  id                            Int                     @id @default(autoincrement())
+  empresa_id                    Int
+  archivo_bancario_id           Int?
+  fecha_proceso                 DateTime                @db.DateTime(0)
+  periodo_inicio                DateTime                @db.DateTime(0)
+  periodo_fin                   DateTime                @db.DateTime(0)
+  total_movimientos_bancarios   Int?
+  total_cfdis_periodo           Int?
+  movimientos_conciliados       Int?
+  movimientos_pendientes        Int?
+  movimientos_descartados       Int?
+  movimientos_manuales          Int?
+  conciliados_exacto            Int?
+  conciliados_referencia        Int?
+  conciliados_aproximado        Int?
+  conciliados_complemento_ppd   Int?
+  conciliados_heuristica        Int?
+  conciliados_ml_patron         Int?
+  monto_total_conciliado        Decimal?                @db.Decimal(16, 2)
+  monto_total_pendiente         Decimal?                @db.Decimal(16, 2)
+  nivel_confianza_promedio      Decimal?                @db.Decimal(3, 2)
+  tiempo_procesamiento_segundos Int?
+  alertas_criticas              Json?
+  sugerencias                   Json?
+  configuracion_utilizada       Json?
+  errores_proceso               Json?
+  empresas_contribuyentes       empresas_contribuyentes @relation(fields: [empresa_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "resultados_conciliacion_ibfk_1")
+  archivos_bancarios            archivos_bancarios?     @relation(fields: [archivo_bancario_id], references: [id], onUpdate: NoAction, map: "resultados_conciliacion_ibfk_2")
+
+  @@index([archivo_bancario_id], map: "archivo_bancario_id")
+  @@index([empresa_id, fecha_proceso], map: "idx_resultado_empresa_fecha")
+  @@index([periodo_inicio, periodo_fin], map: "idx_resultado_periodo")
+}
+
+model totales_impuestos_comprobantes_fiscales {
+  id                          Int                   @id @default(autoincrement())
+  cfdi_id                     Int
+  total_impuestos_trasladados Decimal?              @db.Decimal(12, 2)
+  total_iva_trasladado        Decimal?              @db.Decimal(12, 2)
+  total_ieps_trasladado       Decimal?              @db.Decimal(12, 2)
+  total_impuestos_retenidos   Decimal?              @db.Decimal(12, 2)
+  total_iva_retenido          Decimal?              @db.Decimal(12, 2)
+  total_isr_retenido          Decimal?              @db.Decimal(12, 2)
+  total_ieps_retenido         Decimal?              @db.Decimal(12, 2)
+  fecha_creacion              DateTime              @db.DateTime(0)
+  fecha_actualizacion         DateTime              @db.DateTime(0)
+  comprobantes_fiscales       comprobantes_fiscales @relation(fields: [cfdi_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "totales_impuestos_comprobantes_fiscales_ibfk_1")
+
+  @@index([cfdi_id], map: "cfdi_id")
+  @@index([total_impuestos_trasladados], map: "idx_totales_monto")
+}
+
+enum archivos_bancarios_banco {
+  BBVA
+  SANTANDER
+  BANAMEX
+  BANORTE
+  HSBC
+  SCOTIABANK
+  INBURSA
+  AZTECA
+  OTRO
+}
+
+enum movimientos_bancarios_tipo {
+  CARGO
+  ABONO
+}
+
+enum impuestos_conceptos_tipo_factor {
+  Tasa
+  Cuota
+  Exento
+}
+
+enum movimientos_bancarios_estado {
+  PENDIENTE
+  CONCILIADO
+  MANUAL
+  DESCARTADO
+}
+
+enum ReportRequests_requestType {
+  report
+  Metadata
+  CFDI
+  MetadataAndCFDI
+}
+
+enum ReportRequests_downloadType {
+  issued
+  received
+  both
+}
+
+enum movimientos_bancarios_metodo_conciliacion {
+  EXACTO
+  REFERENCIA
+  APROXIMADO
+  COMPLEMENTO_PPD
+  HEURISTICA
+  ML_PATRON
+  MANUAL
+}
+
+enum comprobantes_fiscales_tipo_comprobante {
+  I
+  E
+  T
+  N
+  P
+}
