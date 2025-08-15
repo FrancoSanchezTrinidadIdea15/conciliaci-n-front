@@ -90,7 +90,8 @@ model users {
   createdAt        DateTime         @default(now()) @map("fecha_registro")
   updatedAt        DateTime         @default(now()) @updatedAt @map("ultima_actualizacion")
   rfc              String?          @db.VarChar(20) @unique(map: "rfc")
-
+  resetToken       String?          @map("reset_token")
+  resetTokenExpires DateTime?        @map("reset_token_expires")
   @@map("usuarios")
 }
 

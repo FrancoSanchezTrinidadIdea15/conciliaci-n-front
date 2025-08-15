@@ -1,9 +1,9 @@
-import { Sidebar } from "@/components";
-
 export default function DashboardPage() {
   return (
     <div>
-      <Sidebar />
+     <button className="p-2 text-white bg-blue-500 rounded-md">
+        Hola mundo
+     </button>
     </div>
   )
 }

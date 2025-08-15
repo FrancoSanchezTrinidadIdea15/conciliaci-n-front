@@ -2,7 +2,6 @@
 
 import { signIn } from "@/auth";
 
-
 export async function authenticate(
   prevState: string | undefined,
   formData: FormData
@@ -17,6 +16,7 @@ export async function authenticate(
     return "CredentialsSignin";
   }
 }
+
 export const login = async (email: string, password: string) => {
   try {
     await signIn("credentials", { email, password, redirect: false });
