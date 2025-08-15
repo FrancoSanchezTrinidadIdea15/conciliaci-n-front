@@ -22,8 +22,8 @@ export const SelectTrigger = React.forwardRef<HTMLButtonElement, SelectTriggerPr
     <SelectPrimitive.Trigger
       ref={ref}
       className={`
-        flex h-10 w-full items-center justify-between rounded-md border border-gray-300 bg-white px-3 
-        text-sm shadow-sm outline-none placeholder:text-gray-400
+        flex h-11 w-full items-center justify-between rounded-md border px-3 
+        text-sm shadow-sm outline-none placeholder:text-gray-600
         disabled:cursor-not-allowed disabled:opacity-50
         ${className}
       `}
@@ -48,7 +48,7 @@ export const SelectContent = React.forwardRef<
       ref={ref}
       className={`
         relative z-50 min-w-[8rem] overflow-hidden rounded-md border border-gray-200 bg-white 
-        text-gray-700 shadow-md data-[state=open]:animate-in data-[state=closed]:animate-out 
+        text-gray-900 shadow-md data-[state=open]:animate-in data-[state=closed]:animate-out 
         data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 
         data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 
         data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 
@@ -83,7 +83,7 @@ export const SelectItem = React.forwardRef<
     ref={ref}
     className={`
       relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pl-2 pr-8 
-      text-sm outline-none hover:bg-gray-100 focus:bg-gray-100 
+      text-sm outline-none
       data-[disabled]:pointer-events-none data-[disabled]:opacity-50
       ${className}
     `}

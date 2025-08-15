@@ -1,13 +1,12 @@
 import React from 'react';
 import { FaFileAlt } from 'react-icons/fa';
+import { Button } from '../ui/Button';
 
 interface Movement {
   id: string;
-  concept: string;
   amount: number;
-  date: string;
-  state: 'conciliado' | 'pendiente' | 'sin_conciliar';
-  type: 'ingreso' | 'egreso' | 'transferencia';
+  cfdi: number;
+  movements: number;
 }
 
 interface MovementsTableProps {
@@ -16,31 +15,7 @@ interface MovementsTableProps {
 }
 
 export const MovementsTable = ({ movements, isLoading = false }: MovementsTableProps) => {
-  const getStateColor = (state: string) => {
-    switch (state) {
-      case 'conciliado':
-        return 'text-green-600 bg-green-50';
-      case 'pendiente':
-        return 'text-yellow-600 bg-yellow-50';
-      case 'sin_conciliar':
-        return 'text-red-600 bg-red-50';
-      default:
-        return 'text-gray-600 bg-gray-50';
-    }
-  };
 
-  const getStateText = (state: string) => {
-    switch (state) {
-      case 'conciliado':
-        return 'Conciliado';
-      case 'pendiente':
-        return 'Pendiente';
-      case 'sin_conciliar':
-        return 'Sin conciliar';
-      default:
-        return state;
-    }
-  };
 
   if (isLoading) {
     return (
@@ -70,47 +45,41 @@ export const MovementsTable = ({ movements, isLoading = false }: MovementsTableP
   }
 
   return (
-    <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+    <div className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm">
       <div className="overflow-x-auto">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Concepto
+              <th className="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Monto 
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Monto
+              <th className="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                CFDI
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Fecha
+              <th className="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Movimientos
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Estado
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Tipo
+              <th className="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Vista
               </th>
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
             {movements.map((movement) => (
-              <tr key={movement.id} className="hover:bg-gray-50">
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  {movement.concept}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+              <tr key={movement.id} className="hover:bg-gray-50 transition-colors">
+                <td className="px-4 py-3 text-sm font-semibold text-gray-900 text-center">
                   ${movement.amount.toLocaleString('es-MX', { minimumFractionDigits: 2 })}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  {movement.date}
+                <td className="px-4 py-3 text-center">
+                  <span className="text-gray-900">51</span>
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${getStateColor(movement.state)}`}>
-                    {getStateText(movement.state)}
-                  </span>
+                <td className="px-4 py-3 text-center">
+                  <span className="text-gray-900">51</span>
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 capitalize">
-                  {movement.type}
+                <td className="px-4 py-3 text-center">
+                  <Button variant="blue">
+                    Visualizar
+                  </Button>
                 </td>
               </tr>
             ))}

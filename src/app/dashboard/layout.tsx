@@ -17,11 +17,10 @@ export default async function AdminLayout({
       <MobileSidebar />
       <div className="flex overflow-hidden flex-col flex-1">
         <NavBar />
-        <main className="overflow-y-auto overflow-x-hidden flex-1 p-6 bg-gray-50">
+        <main className="overflow-y-auto overflow-x-hidden flex-1 bg-gray-50">
           {children}
         </main>
       </div>
-      
     </div>
   );
 }

@@ -16,7 +16,7 @@ import { FiSidebar } from "react-icons/fi";
 const navigation = [
   {
     name: "Chatbot",  
-    href: "/dashboard/chat",
+    href: "/dashboard/chatbot",
     icon: IoIosChatboxes,
     description: "Chatbot para resolver dudas y problemas",
   },  

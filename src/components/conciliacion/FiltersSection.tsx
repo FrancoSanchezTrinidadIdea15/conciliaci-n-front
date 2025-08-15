@@ -1,5 +1,6 @@
 import React from 'react';
 import { FaFilter, FaSearch } from 'react-icons/fa';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/Select';
 
 interface FiltersSectionProps {
   onSearch: (term: string) => void;
@@ -36,36 +37,24 @@ export const FiltersSection = ({ onSearch, onStateFilter, onTypeFilter }: Filter
           </div>
         </div>
         
-        <div>
-          <label className="block text-sm text-gray-600 mb-2">
-            Estado
-          </label>
-          <select 
-            onChange={(e) => onStateFilter(e.target.value)}
-            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-          >
-            <option value="">Todos los estados</option>
-            <option value="conciliado">Conciliado</option>
-            <option value="pendiente">Pendiente</option>
-            <option value="sin_conciliar">Sin conciliar</option>
-          </select>
-        </div>
+
         
         <div>
           <label className="block text-sm text-gray-600 mb-2">
             Tipo
           </label>
-          <select 
-            onChange={(e) => onTypeFilter(e.target.value)}
-            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-          >
-            <option value="">Todos los tipos</option>
-            <option value="ingreso">Ingreso</option>
-            <option value="egreso">Egreso</option>
-            <option value="transferencia">Transferencia</option>
-          </select>
+          <Select>
+            <SelectTrigger>
+              <SelectValue placeholder="Tipo" />
+            </SelectTrigger>
+            <SelectContent>
+            <SelectItem value="ingreso">Ingreso</SelectItem>
+            <SelectItem value="egreso">Egreso</SelectItem>
+          </SelectContent>
+          </Select>
         </div>
       </div>
     </div>
+    
   );
 };

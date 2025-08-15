@@ -1,5 +1,5 @@
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-    variant?: "primary" | "secondary" | "ghost";
+    variant?: "primary" | "secondary" | "ghost" | "blue";
     fullWidth?: boolean;
 };
 
@@ -19,6 +19,8 @@ export const Button = ({
         "bg-gray-100 text-gray-900 hover:bg-gray-200 focus-visible:ring-gray-400",
     ghost:
         "bg-transparent text-gray-900 hover:bg-gray-100 focus-visible:ring-gray-300",
+    blue:
+        "bg-blue-500 text-white hover:bg-blue-600 focus-visible:ring-blue-400",
     };
 
     const width = fullWidth ? "w-full" : "";
